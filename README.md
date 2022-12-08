@@ -21,9 +21,11 @@
     1. Current setup for each are as follows:
 
         1. TimeTracker.py => every 15 minutes of every day
-        2. TitleGrabber.py => every 5 minutes of every day
+        2. TitleGrabber.py => every minute of every day
         3. EndTime.py => every minute of every day
         4. Top_Users.py => every day at 1:05 am
+        5. fixDB.py => every day at 11:53 pm
+        6. tokenRefresher.py => every 3 hours of every day
         
         (optional)
         
