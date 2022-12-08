@@ -34,4 +34,4 @@
 
 5. Run `node bot.js` to run the bot and let it go
 
-6. Commands list, details, cooldown and syntax (if necessary) can be found here ->
+6. Commands list, details, cooldown and syntax (if necessary) can be found here -> [Commands](https://github.com/nckrdr826/twitch_bot/blob/main/commands.md)
