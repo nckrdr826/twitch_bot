@@ -263,7 +263,7 @@ function onMessageHandler(channel, tags, message, self) {
 		const db = new sqlite3.Database('./newUsers.db');
 		db.get("SELECT response, isOnCooldown FROM customCommands WHERE command = $command", {$command: myMessage[0].toLowerCase()}, (err, row) => {
 			if(err) {
-				var now = new Date().toLocaleString('en-US', { timeZone: 'America/Los_Angeles' });
+				var now = new Date().toLocaleString('en-US', { timeZone: 'America/Chicago' });
 				console.log(now, '-> ', "CUSTOMS EXISTENCE ERROR");
 				console.log(customs);
 				console.log(myMessage);
@@ -321,7 +321,7 @@ function onMessageHandler(channel, tags, message, self) {
 				var sql = `INSERT INTO customCommands (command, response, cooldown, isOnCooldown) VALUES ('!${command}', '${response}', 2500, 0)`;
 				db.run(sql, (err) => {
 					if(err) {
-						var now = new Date().toLocaleString('en-US', { timeZone: 'America/Los_Angeles' });
+						var now = new Date().toLocaleString('en-US', { timeZone: 'America/Chicago' });
 						client.say(channel, `@${tags.username}, Something went wrong with adding the command`);
 						console.log("ADDITION ERROR");
 						console.log(now);
@@ -381,7 +381,7 @@ function onMessageHandler(channel, tags, message, self) {
 					const db = new sqlite3.Database('./newUsers.db');
 					db.run(sql, (err) => {
 						if(err) {
-							var now = new Date().toLocaleString('en-US', { timeZone: 'America/Los_Angeles' });
+							var now = new Date().toLocaleString('en-US', { timeZone: 'America/Chicago' });
 							client.say(channel, `@${tags.username}, Something went wrong with editing the command`);
 							console.log("EDITING ERROR");
 							console.log(now);
@@ -413,7 +413,7 @@ function onMessageHandler(channel, tags, message, self) {
 				var sql = `DELETE FROM customCommands WHERE command IN (${command})`;
 				db.run(sql, (err) => {
 					if(err) {
-						var now = new Date().toLocaleString('en-US', { timeZone: 'America/Los_Angeles' });
+						var now = new Date().toLocaleString('en-US', { timeZone: 'America/Chicago' });
 						client.say(channel, `@${tags.username}, Something went wrong with deleting the command`);
 						console.log("DELETION ERROR");
 						console.log(now);
@@ -1672,7 +1672,7 @@ async function youtubeGatherInfo(videoType, channel) {
 function getYoutubeStuff(method, url) {
 	return new Promise(function (resolve, reject) {
 		var xhr = new XMLHttpRequest();
-		var now = new Date().toLocaleString('en-US', { timeZone: 'America/Los_Angeles' });
+		var now = new Date().toLocaleString('en-US', { timeZone: 'America/Chicago' });
 		xhr.open(method, url);
 		xhr.onload = function() {
 			if(xhr.readyState === 4 && xhr.status === 200) {
@@ -1812,7 +1812,7 @@ async function downtimeFunction() {
 function makeRequest(method, url) {
 	return new Promise(function (resolve, reject) {
 		var xhr = new XMLHttpRequest();
-		var now = new Date().toLocaleString('en-US', { timeZone: 'America/Los_Angeles' });
+		var now = new Date().toLocaleString('en-US', { timeZone: 'America/Chicago' });
 		xhr.open(method, url);
 		xhr.onload = function() {
 			if(xhr.readyState === 4 && xhr.status === 200) {
@@ -1933,7 +1933,7 @@ function changeCooldownBool(command, value, channel, tags) {
 	const db = new sqlite3.Database('./newUsers.db');
 	db.run("UPDATE customCommands SET isOnCooldown = $value WHERE command = $command", {$command: command, $value: value}, (err) => {
 		if(err) {
-			var now = new Date().toLocaleString('en-US', { timeZone: 'America/Los_Angeles' });
+			var now = new Date().toLocaleString('en-US', { timeZone: 'America/Chicago' });
 			client.say(channel, `@${tags.username}, something went wrong.  Please try again later on`);
 			console.log(now, ': command -> ', command, '; value -> ', value);
 			console.log(err);
