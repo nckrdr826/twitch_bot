@@ -96,28 +96,6 @@ function onResubHandler(channel, username, streakMonths, msg, tags, methods) {
 		client.say(channel, `/me ${username} just subscribed for ${tags["msg-param-cumulative-months"]} months in a row! thank you homie Drake <3 <3 <3 <3`);
 }
 
-function onPrimeUpgradeHandler(channel, username, methods, tags) {
-	console.log("PRIME UPGRADE OCCURRED:")
-	console.log(`channel: ${channel}`);
-	console.log(`username: ${username}`);
-	console.log(`methods: ${methods}`);
-	console.log(`tags:`);
-	console.log(tags);
-	console.log("-----------------------")
-	console.log();
-}
-
-function onGiftUpgradeHandler(channel, username, sender, tags) {
-	console.log("GIFT UPGRADE OCCURRED:")
-	console.log(`channel: ${channel}`);
-	console.log(`username: ${username}`);
-	console.log(`sender: ${sender}`);
-	console.log(`tags:`);
-	console.log(tags);
-	console.log("-----------------------")
-	console.log();
-}
-
 const fileUrl = './cookie.txt';
 const cannonFile = './cannon.txt';
 const titleFile = './title.txt';
