@@ -20,15 +20,15 @@
 
     1. Current setup and purpose for each are as follows:
 
-        1. TimeTracker.py => every 15 minutes of every day
+        1. `TimeTracker.py` => every 15 minutes of every day
             1. Every 15 minutes of every day it will send a request to the Twitch API to see if the stream is live.  If it's not, then it quits and starts again in 15 mintues.  If the stream is live, it gathers the viewer list, compiles it into smaller chunks, passes each of those chunks to an API endpoint to get the user_id of each user, gets the data from the database and if the user already exists in the database, increases their time by 15 minutes; otherwise adds them to the database and sets their time at 15 minutes.
-        2. TitleGrabber.py => every minute of every day
+        2. `TitleGrabber.py` => every minute of every day
             1. Retrieves the title of the stream from the API.  If it's different from what's currently saved, updates it.  If not, does nothing and ends.
-        2. Top_Users.py => every day at 1:05 am
+        3. `Top_Users.py` => every day at 1:05 am
             1. Refreshes the list for `!toptime` by grabbing the top 10 users in the database.
-        4. fixDB.py => every day at 11:53 pm
+        4. `fixDB.py` => every day at 11:53 pm
             1. Reformats the database so that it stays in a nice format
-        5. tokenRefresher.py => every 3 hours of every day
+        5. `tokenRefresher.py` => every 3 hours of every day
             1. Refreshes the Twitch API token so that it always works.
         
         (optional)
