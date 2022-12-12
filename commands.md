@@ -10,14 +10,14 @@
     - Details: Add a custom command to the bot to be used. 
     - Cooldown: null
     - Permissions: specific people
-    - Syntax/Ex: `!addcom [command to add] [response]`
-        - Ex: `!addcom test This is a test command`
+    - Syntax/Ex: `!addcom [command to add with or without the !] [response]`
+        - Ex: `!addcom test This is a test command` OR `!addcom !test This is a test command`
 3. editcom
     - Details: Edit one of the commands added via `!addcom` or a preset list of commands whose response have the potential to change on a per-stream basis
     - Cooldown: null
     - Permissions: specific people
-    - Syntax/Ex: `!editcom [the command to edit WITH the !] [the new response for the command]`
-        - Ex: `!editcom !camera No camera is used`
+    - Syntax/Ex: `!editcom [the command to edit with or without the !] [the new response for the command]`
+        - Ex: `!editcom !camera No camera is used` OR `!editcom !camera No camera is used`
 4. delcom
     - Details: Delete one or more of the commands added via `!addcom`
     - Cooldown: null
