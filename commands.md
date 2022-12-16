@@ -45,11 +45,13 @@
     - Cooldown: 2.5 seconds
     - Permissions: null
     - Syntax/Ex: `!hate` OR `!hate [other user's name]`
+        - Ex: `!hate` OR `!hate emiru`
 8. love
     - Details: Show how much you either love someone else in chat or how much you love yourself
     - Cooldown: 2.5 seconds
     - Permissions: null
     - Syntax/Ex: `!love` OR `!love [other user's name]`
+        - Ex: `!love` OR `!love emiru`
 9. cannon
     - Details: Returns how many times Emiru has missed a cannon in League of Legends (counter increases by 1 everytime the command is used)
     - Cooldown: 2.5 seconds
@@ -100,6 +102,7 @@
     - Cooldown: 2.5 seconds
     - Permissions: null
     - Syntax/Ex: `!8ball [question goes here]`
+        - Ex: `!8ball will I win my next game`
 19. sad
     - Details: Replies with message that Emiru said on stream a long time ago
     - Cooldown: 2.5 seconds
@@ -139,7 +142,8 @@
     - Details: Returns either a preset link to Emiru's multiple League of Legends account rankings or if other parameters are provided, returns a link with that new info
     - Cooldown: 2.5 seconds
     - Permissions: null
-    - Syntax/Ex: `!opgg` `!opgg KR Hide on Bush`
+    - Syntax/Ex: `!opgg` optionally followed by `[region] [username]`
+        - Ex: `!opgg` `!opgg KR Hide on Bush`
 27. playlist
     - Details: Returns Spotify links to Emiru's Intro playlist, General playlist, and the Chat made playlist
     - Cooldown: 2.5 seconds
@@ -214,12 +218,14 @@
     - Details: Check how long you or someone else has been following this channel or another channel
     - Cooldown: 7.5 seconds
     - Permissions: null
-    - Syntax/Ex: `!followage` OR `!followage pokimane` OR `!followage emiru pokimane`
+    - Syntax/Ex: `!followage` optionally followed by `a user to check in the current channel` OR `a user and a channel to check`
+        - Ex: `!followage` OR `!followage pokimane` OR `!followage emiru pokimane`
 42. accountage
     - Details: Find out how long ago either your own Twitch account or another user's Twitch account was made
     - Cooldown: 7.5 seconds
     - Permissions: null
-    - Syntax/Ex: `!accountage` OR `!accountage emiru`
+    - Syntax/Ex: `!accountage [user to search]`
+        - Ex: `!accountage` OR `!accountage emiru`
 43. giveaway
     - Details: Enter a giveaway (that doesn't exist)
     - Cooldown: 2.5 seconds
@@ -234,7 +240,8 @@
     - Details: Find out how many hours and minutes you or another user have spent as a part of chat WHILE THE STREAM IS LIVE
     - Cooldown: 5 seconds
     - Permissions: null
-    - Syntax/Ex: `!time` OR `!time emiru` OR `!watchtime` OR `!watchtime emiru`
+    - Syntax/Ex: `!time` OR `!watchtime` optionally followed by another user name
+        - Ex: `!time` OR `!time emiru` OR `!watchtime` OR `!watchtime emiru`
 46. toptime
     - Details: Find out who the top 10 people are that have spent the most time in chat
     - Cooldown: 2.5 seconds
@@ -319,8 +326,15 @@
     - Details: Provide a question to ask Wolfram Alpha
     - Cooldown: 5 seconds
     - Permissions: null
-    - Syntax/Ex: null
-63. commands
+    - Syntax/Ex: `!query [your question]`
+        - Ex: `!query how old is the earth`
+63. stats
+    - Details: Check command usage stats
+    - Cooldown: 2.5 seconds
+    - Permissions: null
+    - Syntax/Ex: `!stats [command to check with or without the !]`
+        - Ex: `!stats roulette` OR `!stats !roulette`
+64. commands
     - Details: Returns a list of commands that currently exist plus any custom commands created with `!addcom`
     - Cooldown: 2.5 seconds
     - Permissions: null
