@@ -261,6 +261,7 @@ function onMessageHandler(channel, tags, message, self) {
 		ciqlJSON.open("commandStats.json");
 		statsData.forEach((key, index) => {
 			ciqlJSON.set(`${key}`, commandStats[key])
+			delete commandStats[key];
 		});
 		ciqlJSON.save();
 	}
