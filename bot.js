@@ -14,6 +14,7 @@ var httpRequest = require('https');
 var opts = {
 	options: {
 		debug: false
+		// debug: true
 	},
 
 	identity: {
@@ -24,10 +25,18 @@ var opts = {
 		secure: true
 	},
 	channels: [
+		// "badeed"
 		"ribcrush",
 		"emiru"
 	]
 };
+
+//StepMania DDR settings
+var secretKey = 'any-secret-here'; //secret word can be set as anything but must match server files
+var modOnlyMode = true; //enable mod only request mode for ddrcommands can be toggled off with !ddrtoggle
+var TWITCHUSER = "badeed"; //where to read the channel points what channel
+var OAUTH = "oauth:vp3j5helh9g6lmllm9a5j4sknzdn07"; //this has to be oauth code for a different bot cant be same as main bot its current "iambadeed"
+
 var client = new tmi.client(opts);
 
 client.on('message', onMessageHandler);
@@ -37,6 +46,8 @@ client.on('submysterygift', onSubMysteryGiftHandler); //multiple gifts
 client.on('subgift', onSubGiftHandler); //single gift
 client.on('subscription', onSubHandler); //normal sub
 client.on('resub', onResubHandler); //normal resub
+/*client.on('primepaidupgrade', onPrimeUpgradeHandler); //upgrade from prime to paid
+client.on('giftpaidupgrade', onGiftUpgradeHandler); //upgrade from gifted to paid*/
 
 client.connect();
 client.on('connected', onConnectHandler);
@@ -96,20 +107,51 @@ function onResubHandler(channel, username, streakMonths, msg, tags, methods) {
 		client.say(channel, `/me ${username} just subscribed for ${tags["msg-param-cumulative-months"]} months in a row! thank you homie Drake <3 <3 <3 <3`);
 }
 
+function onPrimeUpgradeHandler(channel, username, methods, tags) {
+	console.log("PRIME UPGRADE OCCURRED:")
+	console.log(`channel: ${channel}`);
+	console.log(`username: ${username}`);
+	console.log(`methods: ${methods}`);
+	console.log(`tags:`);
+	console.log(tags);
+	console.log("-----------------------")
+	console.log();
+}
+
+function onGiftUpgradeHandler(channel, username, sender, tags) {
+	console.log("GIFT UPGRADE OCCURRED:")
+	console.log(`channel: ${channel}`);
+	console.log(`username: ${username}`);
+	console.log(`sender: ${sender}`);
+	console.log(`tags:`);
+	console.log(tags);
+	console.log("-----------------------")
+	console.log();
+}
+
 const fileUrl = './cookie.txt';
 const cannonFile = './cannon.txt';
 const titleFile = './title.txt';
 
-var badIDs = []
+var badIDs = ['88492428', '748899976']//,'128060738','31080568'];
+			/* Markzynk , emirupointbot , Jaguarrrx , Dishcat_ */
 			
 var safeCommands = ['!vanish', '!time', '!roulette'];
 
-var goodIDs = [];
+var goodIDs = ['47537917','98397195','91067577', '562393827', '140167523', '57076559', '412297899'];//, '67850056'];
+			  /* Hayleyy , Ribcrush , Emiru    ,  Melissa   ,  Cortnie   ,  Triynh   ,  AlyKitty ,      Philly  */
+			  
+/*
+Philly's last database data (11/12/2022):
+index	Name			Time	User_ID
+635997	phillyphan215	24285.0	67850056
+*/
 
 var cookie = Number(fs.readFileSync(fileUrl));
 var cannons = Number(fs.readFileSync(cannonFile));
 var streamTitle = fs.readFileSync(titleFile);
 
+//var customs = ciqlJSON.open('customCommands.json').getKeys() || [];
 
 var rouletteActive = true;
 var cookieActive = true;
@@ -151,7 +193,6 @@ var followageActive = true;
 var accountAgeActive = true;
 var giveawayActive = true;
 var songActive = true;
-var neonblueActive = true;
 var timeActive = true;
 var toptimeActive = true;
 var pbActive = true;
@@ -172,19 +213,21 @@ var teamActive = true;
 var scheduleActive = true;
 var timeoffActive = true;
 var queryActive = true;
+var statsActive = true;
 var commandsActive = true;
 
 
 /*REDEEMED COMMANDS START HERE*/
 var emiru_e_Active = true;
 var kattahActive = true;
+var goatActive = true;
 /*REDEEMED COMMANDS  END  HERE*/
 
-
+var commandStats = {};
 
 var emiruDancyCount = 0;
-var midnight = "0:00:00";
-var now = null;
+var midnight = "23:59:45";
+var midnightExtended = "23:59:55";
 var emiruDancyActive = true;
 
 const responses = ['All signs point to yes...', 'Yes!', 'My sources say nope.', 'You may rely on it.', 'Concentrate and ask again...', 'Outlook not so good...', 'It is decidedly so!', 'Better not tell you.', 'Very doubtful.', 'Yes - Definitely!', 'It is certain!', 'Most likely.', 'Ask again later.', 'No!', 'Outlook good.', 'Don\'t count on it.', 'No don\'t even think about.', 'hells no.', 'look deep in your heart and you will see the answer', 'the answer might not be not no', 'if the Twitch gods grant it Prayge'];
@@ -195,11 +238,29 @@ const deathResponses = ['The trigger is pulled, and the revolver fires! ${tags.u
 
 const helpCommands = ['roulette', 'cookie', 'hate', 'love', '8ball', 'uptime', 'followage', 'accountage', 'watchtime', 'time', 'toptime'];
 
+/*var blacklistedWords = ['mommy', 'mоmmу', 'mоmmу', 'm0mmy', 'mօmmy'];
+var searchRegex = new RegExp(blacklistedWords.join('|'), 'g');
+var reg2 = new RegExp(/[οоօуγМ]/, 'g');*/
 var blackistedWords = ['mommy', 'm0mmy'];
 var searchRegex = new RegExp(blackistedWords.join('|'), 'g');
 
+// updating emiruDancy value on application close
 process
 	.on('SIGINT', function() {
+		/*var rawData = fs.readFileSync('data.json');
+		var data = JSON.parse(rawData).emiruDancy;
+		emiruDancyCount += parseInt(data);
+		var lamontingVal = JSON.parse(rawData).lamonting;
+		lamontingCount += parseInt(lamontingVal);
+		var gachiGasm = JSON.parse(rawData).gachiGASM;
+		gachiGASMCount += parseInt(gachiGasm);
+		ciqlJSON
+			.open("data.json")
+			.set("emiruDancy", emiruDancyCount)
+			.set("lamonting", lamontingCount)
+			.set("gachiGASM", gachiGASMCount)
+			.save();
+		process.exit(0);*/
 		var rawData = fs.readFileSync('data.json');
 		var data = JSON.parse(rawData).emiruDancy;
 		emiruDancyCount += parseInt(data);
@@ -223,8 +284,10 @@ process
 	});
 
 function onMessageHandler(channel, tags, message, self) {
+	// console.log(commandStats);
 	if(self) return;
-    
+	
+	//message = message.replace(/[\u034f\u2800(\u{e0000}\u{dc00})\u180e\ufeff\u2000-\u200d\u206D]/gu, '');
 	var regexMessage = message.replaceAll('0', 'o').replaceAll('ο', 'o').replaceAll('о', 'o').replaceAll('օ', 'o').replaceAll('у', 'y').replaceAll('γ', 'y').replaceAll('М', 'm');
 
 	if(regexMessage.toLowerCase().match(searchRegex) !== null) { // || message.toLowerCase().match(reg2) !== null) {
@@ -242,28 +305,52 @@ function onMessageHandler(channel, tags, message, self) {
 	if(tags.username === "emirubot")
 		process.exit(0);
 		
-	if(message.includes("emiruDancy") && message[0] !== '!' && !self) {
+	if(message.includes("emiruDancy") && message[0] !== '!' && !self)
 		emiruDancyCount += message.split("emiruDancy").length - 1;
-		now = moment().format("H:mm:ss");
-		if(now === midnight) {
-			var rawData = fs.readFileSync('data.json');
-			var data = JSON.parse(rawData).emiruDancy;
-			emiruDancyCount += parseInt(data);
-			ciqlJSON
-				.open("data.json")
-				.set("emiruDancy", emiruDancyCount)
-				.save();
-			emiruDancyCount = 0;
-		}
+
+
+	var now = moment().format("H:mm:ss");
+	if(now >= midnight && now <= midnightExtended) {
+		var rawData = fs.readFileSync('data.json');
+		var data = JSON.parse(rawData).emiruDancy;
+		emiruDancyCount += parseInt(data);
+		ciqlJSON
+			.open("data.json")
+			.set("emiruDancy", emiruDancyCount)
+			.save();
+		emiruDancyCount = 0;
+		const statsData = Object.keys(commandStats);
+		ciqlJSON.open("commandStats.json");
+		statsData.forEach((key, index) => {
+			ciqlJSON.set(`${key}`, commandStats[key])
+		});
+		ciqlJSON.save();
 	}
 
+
+	//const myMessage = message.toString().split(' ');
 	const myMessage = message.toString().split(/\s+/g);
+
+	//if(badIDs.includes(tags['user-id']) && (myMessage[0].toLowerCase() != '!vanish' || myMessage[0].toLowerCase() != '!time' || myMessage[0].toLowerCase() != '!roulette')) {
+		/*if(channel == '#ribcrush')
+			console.log(`${tags['user-id']} said ${myMessage[0]}`);
+		if(myMessage[0].toLowerCase() == '!roulette') {
+			console.log(`markzynk used ${myMessage[0].toLowerCase()}: ${myMessage}`);
+		}*/
+	if(badIDs.includes(tags['user-id'])) {
+		if (safeCommands.includes(myMessage[0].toLowerCase())) {
+			var now = new Date().toLocaleString('en-US', { timeZone: 'America/Los_Angeles' });
+			console.log(now, `mark used command: ${myMessage[0].toLowerCase()}.  The whole message (split up) was: ${myMessage}`);
+		}
+		else
+			return;
+	}
 		
 	if(customs.has(myMessage[0].toLowerCase())) {
 		const db = new sqlite3.Database('./newUsers.db');
 		db.get("SELECT response, isOnCooldown FROM customCommands WHERE command = $command", {$command: myMessage[0].toLowerCase()}, (err, row) => {
 			if(err) {
-				var now = new Date().toLocaleString('en-US', { timeZone: 'America/Chicago' });
+				var now = new Date().toLocaleString('en-US', { timeZone: 'America/Los_Angeles' });
 				console.log(now, '-> ', "CUSTOMS EXISTENCE ERROR");
 				console.log(customs);
 				console.log(myMessage);
@@ -289,9 +376,38 @@ function onMessageHandler(channel, tags, message, self) {
 			}
 		});
 		db.close();
+		//var rawData = fs.readFileSync('customCommands.json');
+		//var data = JSON.parse(rawData);
+		//var command = myMessage[0]
+		//client.say(channel, `${data[command]}`);
 	}
 
 	switch(myMessage[0].toLowerCase()) {
+		case '!ban':
+			if(channel == '#ribcrush') {
+				timeoutUser('timeout', myMessage[1], 300);
+				/*
+				--trying and failing with incorrect credentials
+				pi@raspberrypi:~/Desktop $ node bot.js 
+				CONNECTED
+				Received 94 of 94
+				Loaded: 401 {"error":"Unauthorized","status":401,"message":"Missing scope: moderator:manage:banned_users"}
+				--
+				--trying and succeeding with correct credentials (BANNED)
+				^Cpi@raspberrypi:~/Desktop $ node bot.js 
+				CONNECTED
+				Received 140 of 140
+				Loaded: 200 {"data":[{"broadcaster_id":"47537917","moderator_id":"98397195","user_id":"147827275","created_at":"2022-09-09T05:17:20Z","end_time":null}]}
+				--
+				----trying and succeeding with correct credentials (timed out)
+				pi@raspberrypi:~/Desktop $ node bot.js 
+				CONNECTED
+				Received 158 of 158
+				Loaded: 200 {"data":[{"broadcaster_id":"47537917","moderator_id":"98397195","user_id":"147827275","created_at":"2022-09-09T05:19:57Z","end_time":"2022-09-09T05:20:57Z"}]}
+				*/
+			}
+			break;
+			
 		case '!emirudancy':
 			if(emiruDancyActive) {
 				var rawData = fs.readFileSync('data.json');
@@ -309,8 +425,11 @@ function onMessageHandler(channel, tags, message, self) {
 			break;
 				
 		case '!addcom':
+			//if(tags.mod || tags.badges.broadcaster == 1 || goodIDs.includes(tags['user-id'])) {
 			if(tags.badges.broadcaster == 1 || goodIDs.includes(tags['user-id'])) {
 				var command = myMessage[1].toLowerCase();
+				if(command.startsWith('!'))
+					command = command.slice(1)
 				var commandArgs = [];
 				for(var i = 2; i < myMessage.length; i++) {
 					commandArgs.push(myMessage[i]);
@@ -321,7 +440,7 @@ function onMessageHandler(channel, tags, message, self) {
 				var sql = `INSERT INTO customCommands (command, response, cooldown, isOnCooldown) VALUES ('!${command}', '${response}', 2500, 0)`;
 				db.run(sql, (err) => {
 					if(err) {
-						var now = new Date().toLocaleString('en-US', { timeZone: 'America/Chicago' });
+						var now = new Date().toLocaleString('en-US', { timeZone: 'America/Los_Angeles' });
 						client.say(channel, `@${tags.username}, Something went wrong with adding the command`);
 						console.log("ADDITION ERROR");
 						console.log(now);
@@ -333,10 +452,24 @@ function onMessageHandler(channel, tags, message, self) {
 					}
 				});
 				db.close();
+				/*db.run(`INSERT INTO customCommands (command, response, cooldown, isOnCooldown) VALUES (?, ?, ?, ?)` , ['!' + command, response, 2500, 0], function(err) {
+					if(err) {
+						return console.log(err.message);
+						client.say(channel, `Something went wrong`);
+					}
+					else {
+						client.say(channel, `@${tags.username}, !${command} was added`);
+					}
+				});
+				db.close();*/
+				//ciqlJSON
+					//.open("customCommands.json")
+					//.set(command, response)
+					//.save();
 			}
 			break;
-            
 		case '!editcom':
+			//if(tags.mod || tags.badges.broadcaster == 1 || goodIDs.includes(tags['user-id'])) {
 			if(tags.badges.broadcaster == 1 || goodIDs.includes(tags['user-id'])) {
 				if(myMessage[1] === 'cosplay') {
 					var cosplayEditArgs = [];
@@ -356,7 +489,9 @@ function onMessageHandler(channel, tags, message, self) {
 					if(myMessage[1] == "!squad")
 						myMessage[1] = "!team";
 					
-					var commandToEdit = myMessage[1].toLowerCase().slice(1);
+					var commandToEdit = myMessage[1].toLowerCase();
+					if(commandToEdit.startsWith('!'))
+						commandToEdit = commandToEdit.slice(1);
 					var args = [];
 					for(var i = 2; i < myMessage.length; i++) {
 						args.push(myMessage[i]);
@@ -368,27 +503,29 @@ function onMessageHandler(channel, tags, message, self) {
 						.set(commandToEdit, newResponse)
 						.save();
 						
-					client.say(channel, `@${tags.username}, ${commandToEdit} command updated`);
+					client.say(channel, `@${tags.username}, !${commandToEdit} command updated`);
 				}
 				else if(customs.has(myMessage[1].toLowerCase())) {
 					var command = myMessage[1].toLowerCase();
+					if(command.startsWith('!'))
+						command = command.slice(1)
 					var args = [];
 					for(var i = 2; i < myMessage.length; i++) {
 						args.push(myMessage[i]);
 					}
 					var response = args.join(' ');
-					var sql = `UPDATE customCommands SET response = '${response}' WHERE command = '${command}'`;
+					var sql = `UPDATE customCommands SET response = '${response}' WHERE command = '!${command}'`;
 					const db = new sqlite3.Database('./newUsers.db');
 					db.run(sql, (err) => {
 						if(err) {
-							var now = new Date().toLocaleString('en-US', { timeZone: 'America/Chicago' });
+							var now = new Date().toLocaleString('en-US', { timeZone: 'America/Los_Angeles' });
 							client.say(channel, `@${tags.username}, Something went wrong with editing the command`);
 							console.log("EDITING ERROR");
 							console.log(now);
 							console.log(err);
 						}
 						else
-							client.say(channel, `@${tags.username}, the ${command} command was successfully updated`);
+							client.say(channel, `@${tags.username}, the !${command} command was successfully updated`);
 					});
 					db.close();
 				}
@@ -396,6 +533,7 @@ function onMessageHandler(channel, tags, message, self) {
 			break;
 			
 		case '!delcom':
+			//if(tags.mod || tags.badges.broadcaster == 1 || goodIDs.includes(tags['user-id'])) {
 			if(tags.badges.broadcaster == 1 || goodIDs.includes(tags['user-id'])) {
 				var args = [];
 				for(var i = 1; i < myMessage.length; i++) {
@@ -409,11 +547,13 @@ function onMessageHandler(channel, tags, message, self) {
 					}
 				}
 				var command = args.join(', ').toLowerCase();
+				//var command = myMessage[1].toLowerCase();
+				//customs.delete(command);
 				const db = new sqlite3.Database('./newUsers.db');
 				var sql = `DELETE FROM customCommands WHERE command IN (${command})`;
 				db.run(sql, (err) => {
 					if(err) {
-						var now = new Date().toLocaleString('en-US', { timeZone: 'America/Chicago' });
+						var now = new Date().toLocaleString('en-US', { timeZone: 'America/Los_Angeles' });
 						client.say(channel, `@${tags.username}, Something went wrong with deleting the command`);
 						console.log("DELETION ERROR");
 						console.log(now);
@@ -435,8 +575,9 @@ function onMessageHandler(channel, tags, message, self) {
 
 		case '!roulette':
 			if(rouletteActive) {
+				commandStats.roulette == undefined ? commandStats.roulette = 1 : commandStats.roulette += 1;
 				var rouletteVal = Math.random() * 6;
-				if(myMessage[1] === undefined) {
+				if(myMessage[1] === undefined) { //means that the second value in the array also doesn't exist
 					client.say(channel, `/me places the revolver to @${tags.username}'s head`);
 					setTimeout(() => {
 						if(rouletteVal < (1/6)) {
@@ -454,6 +595,7 @@ function onMessageHandler(channel, tags, message, self) {
 					}, 1500);
 				}
 				
+				//else if(myMessage[1] !== undefined && (myMessage[2] === undefined || isNaN(myMessage[2])) ) 
 				else if(myMessage[1] !== undefined && myMessage[2] === undefined) { //no chambers specified START
 					if(!isNaN(myMessage[1]) && (myMessage[1] > 604800)) {
 						client.say(channel, `Max timeout of 1 week (604,800 seconds) exceeded`);
@@ -517,7 +659,7 @@ function onMessageHandler(channel, tags, message, self) {
 								chambers = 6;
 							else if(myMessage[1] < 1)
 								chambers = 1;
-							else
+							else //if(myMessage[1] <= 6 && myMessage[1] >= 1))
 								chambers = myMessage[1];
 						}
 						client.say(channel, `/me places the revolver to @${tags.username}'s head`);
@@ -576,6 +718,7 @@ function onMessageHandler(channel, tags, message, self) {
 
 		case '!cookie':
 			if(cookieActive) {
+				commandStats.cookie == undefined ? commandStats.cookie = 1 : commandStats.cookie += 1;
 				const cookieVal = Math.ceil((Math.random() - 0.5) * 200);
 				cookie += cookieVal;
 				if(cookieVal < 0)
@@ -600,6 +743,7 @@ function onMessageHandler(channel, tags, message, self) {
 
 		case '!hate':
 			if(hateActive) {
+				commandStats.hate == undefined ? commandStats.hate = 1 : commandStats.hate += 1;
 				const hateVal = Math.floor(Math.random() * 100) + 1 + '%';
 				if(myMessage[1] === undefined)
 					myMessage[1] = tags.username;
@@ -614,6 +758,7 @@ function onMessageHandler(channel, tags, message, self) {
 
 		case '!love':
 			if(loveActive) {
+				commandStats.love == undefined ? commandStats.love = 1 : commandStats.love += 1;
 				const loveVal = Math.floor(Math.random() * 100) + 1 + '%';
 				if(myMessage[1] === undefined)
 					myMessage[1] = tags.username;
@@ -628,6 +773,7 @@ function onMessageHandler(channel, tags, message, self) {
 
 		case '!cannon':
 			if(cannonActive) {
+				commandStats.cannon == undefined ? commandStats.cannon = 1 : commandStats.cannon += 1;
 				cannons++;
 				client.say(channel, `Emiru has missed cannon ${cannons} times emiruYIKES`);
 
@@ -645,6 +791,7 @@ function onMessageHandler(channel, tags, message, self) {
 
 		case '!wednesday':
 			if(wednesdayActive) {
+				commandStats.wednesday == undefined ? commandStats.wednesday = 1 : commandStats.wednesday += 1;
 				const timeZone = new Date().toLocaleString("en-US", { timeZone: "America/Chicago" });
 				const day = new Date(timeZone).getDay();
 				if(day === 3)
@@ -661,6 +808,7 @@ function onMessageHandler(channel, tags, message, self) {
 			
 		case '!thursday':
 			if(thursdayActive) {
+				commandStats.thursday == undefined ? commandStats.thursday = 1 : commandStats.thursday += 1;
 				const timeZone = new Date().toLocaleString("en-US", { timeZone: "America/Chicago" });
 				const day = new Date(timeZone).getDay();
 				if(day === 4)
@@ -677,6 +825,7 @@ function onMessageHandler(channel, tags, message, self) {
 
 		case '!woo':
 			if(wooActive) {
+				commandStats.woo == undefined ? commandStats.woo = 1 : commandStats.woo += 1;
 				client.say(channel, `emiWOO`);
 
 				wooActive = false;
@@ -691,6 +840,7 @@ function onMessageHandler(channel, tags, message, self) {
 				return
 			else {
 				if(titleActive) {
+					commandStats.title == undefined ? commandStats.title = 1 : commandStats.title += 1;
 					var title = fs.readFileSync(titleFile);
 					client.say(channel, `${title}`);
 
@@ -702,8 +852,41 @@ function onMessageHandler(channel, tags, message, self) {
 			}
 			break;
 
+		/*case '!update':
+			if(goodIDs.includes(tags['user-id'])) {
+				var xhr = new XMLHttpRequest();
+				xhr.open('GET', 'https://api.twitch.tv/helix/streams?user_login=emiru', true);
+				xhr.onreadystatechange = () => {
+					if(xhr.readyState === 4 && xhr.status === 200) {
+						var myArr = JSON.parse(xhr.responseText);
+						if(Object.keys(myArr.data).length === 0) {
+							console.log('\x1b[42m%s\x1b[0m', "updated from file");
+						}
+						else {
+							streamTitle = myArr.data[0].title;
+							console.log('\x1b[44m%s\x1b[0m', "updated from API");
+						}
+						console.log('\x1b[41m%s\x1b[0m', "title updated");
+						client.say(channel, `Title command updated`);
+						fs.writeFile(titleFile, streamTitle, (err) => {
+							if(err)
+								throw err;
+						});
+					}
+				}
+				xhr.setRequestHeader("Authorization", process.env.TWITCH_AUTH);
+				xhr.setRequestHeader("Client-Id", process.env.TWITCH_CLIENT);
+				xhr.send(null);
+			}
+			else {
+				client.say(channel, `You are not authorized to update`);
+			}
+			break;*/
+
 		case '!doesemiruspeakchineseorgerman':
+		case '!doesemiruspeakgermanorchinese':
 			if(chineseGermanActive) {
+				commandStats.chineseGerman == undefined ? commandStats.chineseGerman = 1 : commandStats.chineseGerman += 1;
 				client.say(channel, `No`);
 
 				chineseGermanActive = false;
@@ -715,6 +898,7 @@ function onMessageHandler(channel, tags, message, self) {
 
 		case '!brother':
 			if(brotherActive) {
+				commandStats.brother == undefined ? commandStats.brother = 1 : commandStats.brother += 1;
 				client.say(channel, `https://www.twitch.tv/13rother`);
 
 				brotherActive = false;
@@ -726,6 +910,7 @@ function onMessageHandler(channel, tags, message, self) {
 
 		case '!rules':
 			if(rulesActive) {
+				commandStats.rules == undefined ? commandStats.rules = 1 : commandStats.rules += 1;
 				client.say(channel, `Emi's Rules: 1. Racism/sexism/homophobia/transphobia/etc. will not be tolerated.  2. If your spam sucks u will be timed out.  3. Dont be dicks to my mods and be nice to other chatters/stream guests.`);
 
 				rulesActive = false;
@@ -737,6 +922,7 @@ function onMessageHandler(channel, tags, message, self) {
 
 		case '!smite':
 			if(smiteActive) {
+				commandStats.smite == undefined ? commandStats.smite = 1 : commandStats.smite += 1;
 				client.say(channel, `emiru play smite emiruPls`);
 
 				smiteActive = false;
@@ -748,6 +934,7 @@ function onMessageHandler(channel, tags, message, self) {
 
 		case '!8ball':
 			if(magicBallActive) {
+				commandStats.magicBall == undefined ? commandStats.magicBall = 1 : commandStats.magicBall += 1;
 				if(!myMessage[1])
 					client.say(channel, `Gotta ask a question first @${tags.username}`);
 				else {
@@ -764,6 +951,7 @@ function onMessageHandler(channel, tags, message, self) {
 
 		case '!sad':
 			if(sadActive) {
+				commandStats.sad == undefined ? commandStats.sad = 1 : commandStats.sad += 1;
 				client.say(channel, `im not sad. thats just my face lol -emiru`);
 
 				sadActive = false;
@@ -775,6 +963,7 @@ function onMessageHandler(channel, tags, message, self) {
 
 		case '!weeb':
 			if(weebActive) {
+				commandStats.weeb == undefined ? commandStats.weeb = 1 : commandStats.weeb += 1;
 				client.say(channel, `/color #FF69B4`); //hot pink - emirubot's color
 				setTimeout(() => {
 					client.say(channel, `/me ░░░░█▐▄▒▒▒▌▌▒▒▌░▌▒▐▐▐▒▒▐▒▒▌▒▀▄▀▄░ ░░░█▐▒▒▀▀▌░▀▀▀░░▀▀▀░░▀▀▄▌▌▐▒▒▒▌▐░ ░░▐▒▒▀▀▄▐░▀▀▄▄░░░░░░░░░░░▐▒▌▒▒▐░▌ ░░▐▒▌▒▒▒▌░▄▄▄▄█▄░░░░░░░▄▄▄▐▐▄▄▀░░ ░░▌▐▒▒▒▐░░░░░░░░░░░░░▀█▄░░░░▌▌░░░ ▄▀▒▒▌▒▒▐░░░░░░░▄░░▄░░░░░▀▀░░▌▌░░░ ▄▄▀▒▐▒▒▐░░░░░░░▐▀▀▀▄▄▀░░░░░░▌▌░░░ ░░░░█▌▒▒▌░░░░░▐▒▒▒▒▒▌░░░░░░▐▐▒▀▀▄ ░░▄▀▒▒▒▒▐░░░░░▐▒▒▒▒▐░░░░░▄█▄▒▐▒▒▒ ▄▀▒▒▒▒▒▄██▀▄▄░░▀▄▄▀░░▄▄▀█▄░█▀▒▒▒▒`);
@@ -790,6 +979,7 @@ function onMessageHandler(channel, tags, message, self) {
 
 		case '!discord':
 			if(discordActive) {
+				commandStats.dsicord == undefined ? commandStats.dsicord = 1 : commandStats.dsicord += 1;
 				client.say(channel, `discord.gg/emiru emiruLOVE TO JOIN, GO TO THE VERIFICATION ROOM. To get sub status in Discord, simply sync your Twitch account to your Discord in settings!`);
 				
 				discordActive = false;
@@ -801,9 +991,12 @@ function onMessageHandler(channel, tags, message, self) {
 
 		case '!elo':
 			if(eloActive) {
+				commandStats.elo == undefined ? commandStats.elo = 1 : commandStats.elo += 1;
 				var rawData = fs.readFileSync('editableCommands.json');
 				var data = JSON.parse(rawData);
 				client.say(channel, `@${tags.username}, ${data.elo}`);
+				//client.say(channel, `@${tags.username}, current League: plat 4 | opgg of accounts: https://bit.ly/3fsdSQu | current OverWatch 2: Support: Gold 5, Tank: Gold 5`);
+				//client.say(channel, `@${tags.username}, Diamond 3 | opgg of accounts: https://bit.ly/3fsdSQu | PROOF: https://bit.ly/2Jv9IHW`);
 
 				eloActive = false;
 				setTimeout(() => {
@@ -814,9 +1007,12 @@ function onMessageHandler(channel, tags, message, self) {
 
 		case '!rank':
 			if(rankActive) {
+				commandStats.rank == undefined ? commandStats.rank = 1 : commandStats.rank += 1;
 				var rawData = fs.readFileSync('editableCommands.json');
 				var data = JSON.parse(rawData);
 				client.say(channel, `@${tags.username}, ${data.rank}`);
+				//client.say(channel, `@${tags.username}, current League: plat 4 | opgg of accounts: https://bit.ly/3fsdSQu | current OverWatch 2: Support: Gold 5, Tank: Gold 5`);
+				//client.say(channel, `@${tags.username}, Diamond 3 | opgg of accounts: https://bit.ly/3fsdSQu | PROOF: https://bit.ly/2Jv9IHW`);
 
 				rankActive = false;
 				setTimeout(() => {
@@ -827,6 +1023,7 @@ function onMessageHandler(channel, tags, message, self) {
 
 		case '!instagram':
 			if(instagramActive) {
+				commandStats.instagram == undefined ? commandStats.instagram = 1 : commandStats.instagram += 1;
 				client.say(channel, `https://www.instagram.com/emiru.jpg/`);
 
 				instagramActive = false;
@@ -838,6 +1035,7 @@ function onMessageHandler(channel, tags, message, self) {
 
 		case '!merch':
 			if(merchActive) {
+				commandStats.merch == undefined ? commandStats.merch = 1 : commandStats.merch += 1;
 				client.say(channel, `emiru.tv/merch // https://www.designbyhumans.com/shop/Emiru/`);
 
 				merchActive = false;
@@ -849,6 +1047,7 @@ function onMessageHandler(channel, tags, message, self) {
 
 		case '!opgg':
 			if(opggActive) {
+				commandStats.opgg == undefined ? commandStats.opgg = 1 : commandStats.opgg += 1;
 				if(myMessage[1] === undefined)
 					client.say(channel, `@${tags.username}, https://na.op.gg/multisearch/na?summoners=emiru%2Cdumbbun%2Ckirby%2Cbunwithagun%2Cegg`);
 				else {
@@ -860,6 +1059,7 @@ function onMessageHandler(channel, tags, message, self) {
 					var newString = args.join('%20');
 					client.say(channel, `@${tags.username}, https://na.op.gg/summoners/${region}/${newString}`);
 				}
+				//client.say(channel, `@${tags.username}, https://na.op.gg/multi/query=emiru%2Cdumbbun%2Ckirby%2Cbunwithagun`);
 
 				opggActive = false;
 				setTimeout(() => {
@@ -870,6 +1070,7 @@ function onMessageHandler(channel, tags, message, self) {
 
 		case '!playlist':
 			if(playlistActive) {
+				commandStats.playlist == undefined ? commandStats.playlist = 1 : commandStats.playlist += 1;
 				client.say(channel, `INTRO MUSIC PLAYLIST: https://open.spotify.com/playlist/6MrVz9LUs9BAXKEIHzYVtR?si=0ee4e3a90db4462c 🖤 GENERAL PLAYLIST: https://open.spotify.com/playlist/3jpilqxMGQZIkUwIMaYmX4?si=6bbfbcbe972648c1 🖤 CHAT MADE PLAYLIST: https://open.spotify.com/playlist/7ijkZ4OgqiVMHc9LELuvZu?si=1266848860a341dd&nd=1`);
 
 				playlistActive = false;
@@ -881,6 +1082,7 @@ function onMessageHandler(channel, tags, message, self) {
 
 		case '!sub':
 			if(subActive) {
+				commandStats.sub == undefined ? commandStats.sub = 1 : commandStats.sub += 1;
 				client.say(channel, `https://www.twitch.tv/products/lol_emiru/ticket/`);
 
 				subActive = false;
@@ -892,6 +1094,7 @@ function onMessageHandler(channel, tags, message, self) {
 
 		case '!twitter':
 			if(twitterActive) {
+				commandStats.twitter == undefined ? commandStats.twitter = 1 : commandStats.twitter += 1;
 				client.say(channel, `https://twitter.com/emiru`);
 
 				twitterActive = false;
@@ -904,6 +1107,7 @@ function onMessageHandler(channel, tags, message, self) {
 		case '!wallpaper':
 		case '!wallpapers':
 			if(wallpapersActive) {
+				commandStats.wallpapers == undefined ? commandStats.wallpapers = 1 : commandStats.wallpapers += 1;
 				client.say(channel, `https://imgur.com/a/6hGXp (last updated 6/16/2018)`);
 
 				wallpapersActive = false;
@@ -915,6 +1119,7 @@ function onMessageHandler(channel, tags, message, self) {
 
 		case '!emiruez':
 			if(emiruezActive) {
+				commandStats.emiruez == undefined ? commandStats.emiruez = 1 : commandStats.emiruez += 1;
 				client.say(channel, `emiruEZ Clap`);
 
 				emiruezActive = false;
@@ -926,6 +1131,7 @@ function onMessageHandler(channel, tags, message, self) {
 
 		case '!hype':
 			if(hypeActive) {
+				commandStats.hype == undefined ? commandStats.hype = 1 : commandStats.hype += 1;
 				client.say(channel, `HYPE emiruHYPERBUN HYPE emiruHYPERBUN HYPE emiruHYPERBUN HYPE emiruHYPERBUN HYPE emiruHYPERBUN HYPE emiruHYPERBUN HYPE emiruHYPERBUN HYPE emiruHYPERBUN HYPE emiruHYPERBUN HYPE emiruHYPERBUN HYPE emiruHYPERBUN HYPE emiruHYPERBUN HYPE emiruHYPERBUN HYPE emiruHYPERBUN HYPE emiruHYPERBUN HYPE emiruHYPERBUN HYPE emiruHYPERBUN HYPE emiruHYPERBUN`);
 
 				hypeActive = false;
@@ -937,9 +1143,22 @@ function onMessageHandler(channel, tags, message, self) {
 
 		case '!cosplay':
 			if(cosplayActive) {
+				commandStats.cosplay == undefined ? commandStats.cosplay = 1 : commandStats.cosplay += 1;
 				var rawData = fs.readFileSync('data.json');
 				var data = JSON.parse(rawData);
-				client.say(channel, `@${tags.username} ${data.cosplay}`);
+				if(myMessage[1]) {
+					if(myMessage[1].startsWith('@'))
+						myMessage[1] = myMessage[1].slice(1);
+					var checkUser = getUser(myMessage[1]);
+					checkUser.then(function(result){
+						if(result == null)
+							client.say(channel, `@${tags.username} ${data.cosplay}`);
+						else
+							client.say(channel, `@${myMessage[1]} ${data.cosplay}`);
+					});
+				}					
+				else
+					client.say(channel, `@${tags.username} ${data.cosplay}`);
 
 				cosplayActive = false;
 				setTimeout(() => {
@@ -950,6 +1169,7 @@ function onMessageHandler(channel, tags, message, self) {
 
 		case '!uwu':
 			if(uwuActive) {
+				commandStats.uwu == undefined ? commandStats.uwu = 1 : commandStats.uwu += 1;
 				client.say(channel, `⎝⎠ ╲╱╲╱ ⎝⎠`);
 
 				uwuActive = false;
@@ -961,6 +1181,7 @@ function onMessageHandler(channel, tags, message, self) {
 
 		case '!dmca':
 			if(dmcaActive) {
+				commandStats.dmca == undefined ? commandStats.dmca = 1 : commandStats.dmca += 1;
 				client.say(channel, `Emi has obs set up so that music does not show up in the vod or clips. tutorial: https://www.youtube.com/watch?v=ZwnD3tjhPO4 this does not protect against live strikes so use at ur own risk`);
 
 				dmcaActive = false;
@@ -972,6 +1193,7 @@ function onMessageHandler(channel, tags, message, self) {
 
 		case '!faq':
 			if(faqActive) {
+				commandStats.faq == undefined ? commandStats.faq = 1 : commandStats.faq += 1;
 				client.say(channel, `https://emiru.tv/faq`);
 
 				faqActive = false;
@@ -983,6 +1205,7 @@ function onMessageHandler(channel, tags, message, self) {
 
 		case '!height':
 			if(heightActive) {
+				commandStats.height == undefined ? commandStats.height = 1 : commandStats.height += 1;
 				client.say(channel, `5'3 or 160 cm`);
 
 				heightActive = false;
@@ -994,6 +1217,7 @@ function onMessageHandler(channel, tags, message, self) {
 
 		case '!tiktok':
 			if(tiktokActive) {
+				commandStats.tiktok == undefined ? commandStats.tiktok = 1 : commandStats.tiktok += 1;
 				client.say(channel, `https://www.tiktok.com/@emiru`);
 
 				tiktokActive = false;
@@ -1005,6 +1229,7 @@ function onMessageHandler(channel, tags, message, self) {
 
 		case '!vanish':
 			if(vanishActive) {
+				commandStats.vanish == undefined ? commandStats.vanish = 1 : commandStats.vanish += 1;
 				client.say(channel, `/timeout ${tags.username} 1`);
 				//timeoutUser('timeout', tags.username, 1, 'vanished');
 
@@ -1017,6 +1242,7 @@ function onMessageHandler(channel, tags, message, self) {
 
 		case '!uptime':
 			if(uptimeActive) {
+				commandStats.uptime == undefined ? commandStats.uptime = 1 : commandStats.uptime += 1;
 				var xhr = new XMLHttpRequest();
 				xhr.open('GET', 'https://api.twitch.tv/helix/streams?user_login=emiru', true);
 				xhr.onreadystatechange = () => {
@@ -1035,6 +1261,14 @@ function onMessageHandler(channel, tags, message, self) {
 								else //1,2,3,4
 									client.say(channel, `@${tags.username}, Stream is currently offline - last stream was ${result[0]} day(s) and ${result[1]} hour(s) ago; title: ${title}`);
 							});
+							/*if(ans[0] == 0 && ans[1] == 0 && ans[2] == 0)
+								client.say(channel, `@${tags.username}, Stream is currently offline - last stream was ${ans[3]} second(s) ago; title: ${title}`);
+							else if(ans[0] == 0 && ans[1] == 0)
+								client.say(channel, `@${tags.username}, Stream is currently offline - last stream was ${ans[2]} minutes and ${ans[3]} second(s) ago; title: ${title}`);
+							else if(ans[0] == 0)
+								client.say(channel, `@${tags.username}, Stream is currently offline - last stream was ${ans[1]} hour(s) and ${ans[2]} minute(s) ago; title: ${title}`);
+							else
+								client.say(channel, `@${tags.username}, Stream is currently offline - last stream was ${ans[0]} day(s) and ${ans[1]} hour(s) ago; title: ${title}`);*/
 						}
 						else {
 							var ans = uptimeFunction(myArr);
@@ -1056,6 +1290,7 @@ function onMessageHandler(channel, tags, message, self) {
 
 		case '!followage':
 			if(followageActive) { //format is forced as: !followage {user to search for} {channel to search user on}
+				commandStats.followage == undefined ? commandStats.followage = 1 : commandStats.followage += 1;
 				var xhr = new XMLHttpRequest();
 				if(myMessage[2] === undefined) { //if other channel to search is undefined
 					//use emi's channel
@@ -1067,7 +1302,12 @@ function onMessageHandler(channel, tags, message, self) {
 					}
 				}
 				else { //if channel to search IS defined
-					xhr.open('GET', `https://decapi.me/twitch/followage/${myMessage[2]}/${myMessage[1]}?precision=4`, true);
+					/*if(myMessage[1] === undefined) { //if other user to search on the other channel is undefined
+						xhr.open('GET', `https://decapi.me/twitch/followage/${myMessage[2]}/${tags.username}?precision=4`, true);
+					}
+					else { //else search for the user requested*/
+						xhr.open('GET', `https://decapi.me/twitch/followage/${myMessage[2]}/${myMessage[1]}?precision=4`, true);
+					//}
 				}
 
 
@@ -1095,16 +1335,26 @@ function onMessageHandler(channel, tags, message, self) {
 								}
 							}
 						}
-						else {
-                            if(xhr.responseText.includes('does not follow')) {
-                                client.say(channel, `@${tags.username}, ${myMessage[1]} does not follow ${myMessage[2]}`);
-                            }
-                            else {
-                                if(tags.username.toLowerCase() === myMessage[1].toLowerCase())
-                                    client.say(channel, `@${tags.username}, you have been following ${myMessage[2]} for ${xhr.responseText}`);
-                                else
-                                    client.say(channel, `@${tags.username}, ${myMessage[1]} has been following ${myMessage[2]} for ${xhr.responseText}`);
-                            }
+						else { //meaning other channel WAS defined
+							/*if(myMessage[1] === undefined) {
+								if(xhr.responseText.includes('does not follow')) {
+									client.say(channel, `@${tags.username} does not follow ${myMessage[2]}`);
+								}
+								else {
+									client.say(channel, `@${tags.username} has been following ${myMessage[2]} for ${xhr.responseText}`);
+								}
+							}*/
+							//else {
+								if(xhr.responseText.includes('does not follow')) {
+									client.say(channel, `@${tags.username}, ${myMessage[1]} does not follow ${myMessage[2]}`);
+								}
+								else {
+									if(tags.username.toLowerCase() === myMessage[1].toLowerCase())
+										client.say(channel, `@${tags.username}, you have been following ${myMessage[2]} for ${xhr.responseText}`);
+									else
+										client.say(channel, `@${tags.username}, ${myMessage[1]} has been following ${myMessage[2]} for ${xhr.responseText}`);
+								}
+							//}
 						}
 					}
 				}
@@ -1119,6 +1369,7 @@ function onMessageHandler(channel, tags, message, self) {
 			
 		case '!accountage':
 			if(accountAgeActive) {
+				commandStats.accountAge == undefined ? commandStats.accountAge = 1 : commandStats.accountAge += 1;
 				var xhr = new XMLHttpRequest();
 				if(myMessage[1] === undefined) { //if other user to search is undefined then search for the user that issued the command
 					xhr.open('GET', `https://decapi.me/twitch/accountage/${tags.username}?precision=4`, true);
@@ -1155,6 +1406,7 @@ function onMessageHandler(channel, tags, message, self) {
 			
 		case '!giveaway':
 			if(giveawayActive) {
+				commandStats.giveaway == undefined ? commandStats.giveaway = 1 : commandStats.giveaway += 1;
 				client.say(channel, `${tags.username}, You have been entered into the giveaway emiruSMUG`);
 
 				giveawayActive = false;
@@ -1166,6 +1418,7 @@ function onMessageHandler(channel, tags, message, self) {
 
 		case '!song':
 			if(songActive) {
+				commandStats.song == undefined ? commandStats.song = 1 : commandStats.song += 1;
 				client.say(channel, `@${tags.username}, The name of the song + the artist can be found above chat or at the top of the stream`);
 
 				songActive = false;
@@ -1226,6 +1479,7 @@ function onMessageHandler(channel, tags, message, self) {
 		case '!watchtime':	
 		case '!time':
 			if(timeActive) {
+				commandStats.time == undefined ? commandStats.time = 1 : commandStats.time += 1;
 				if(channel === "#emiru" || channel === "#ribcrush") {
 					const db = new sqlite3.Database('./newUsers.db');
 					if(myMessage[1] === undefined) {
@@ -1316,6 +1570,30 @@ function onMessageHandler(channel, tags, message, self) {
 						db.close();
 					}
 				}
+				
+				/*var rawData = fs.readFileSync('cleaned_users.json');
+				var data = JSON.parse(rawData);
+				if(myMessage[1] === undefined) { //check time for user that called command
+					if(data[tags.username] === undefined || data[tags.username] === 0)
+						client.say(channel, `@${tags.username} You haven't spent enough time in chat`);
+					else {
+						var totalTime = Math.round((data[tags.username] / 60) * 100) / 100;
+						var hours = Math.floor(totalTime);
+						var minutes = (totalTime - hours) * 60;
+						client.say(channel, `@${tags.username} You have spent ${hours} hours and ${minutes} minutes in chat`);
+					}
+				}
+				else { //check time for user defined
+					var secondUser = myMessage[1].toLowerCase();
+					if(data[secondUser] === undefined || data[secondUser] === 0)
+						client.say(channel, `@${tags.username}, ${secondUser} hasn't spent enough time in chat.`);
+					else {
+						var totalTime = Math.round((data[secondUser] / 60) * 100) / 100;
+						var hours = Math.floor(totalTime);
+						var minutes = (totalTime - hours) * 60;
+						client.say(channel, `@${tags.username} ${myMessage[1]} has spent ${hours} hours and ${minutes} minutes in chat`);
+					}
+				}*/
 
 				timeActive = false;
 				setTimeout(() => {
@@ -1324,8 +1602,59 @@ function onMessageHandler(channel, tags, message, self) {
 			}
 			break;
 			
+		/*case '!gamble':
+			if(gambleActive) {
+				var gamblePoints = myMessage[1];
+				var rawData = fs.readFileSync('user_points.json');
+				var data = JSON.parse(rawData);
+				if(data[tags.username] === undefined || data[tags.username] < 15 || gamblePoints > data[tags.username])
+					client.say(channel, `@${tags.username} You don't have enough points to gamble`)
+				else {
+					var rand = Math.floor(Math.random() * 100) + 1;
+					var multiplier = 0;
+					if(rand >= 1 && rand <= 25)
+						multiplier = 0;
+					else if(rand >= 26 && rand <= 50)
+						multiplier = 0;
+					else if(rand >= 51 && rand <= 75)
+						multiplier = 2;
+					else if(rand >= 76 && rand <= 98)
+						multiplier = 2;
+					else if(rand >= 99 && rand <= 100)
+						multiplier = 3;
+
+					if(gamblePoints === 'all')
+						gamblePoints = data[tags.username];
+					var resultPoints = gamblePoints * multiplier;
+
+					if(resultPoints == 0)
+						var newTotalPoints = data[tags.username] - gamblePoints;
+					else
+						var newTotalPoints = data[tags.username] + resultPoints;
+
+					ciqlJSON
+						.open("user_points.json")
+						.set(tags.username, newTotalPoints)
+						.save();
+
+
+					if(resultPoints == 0)
+						client.say(channel, `Rolled ${rand}, @${tags.username} lost ${gamblePoints} points and now has ${newTotalPoints} points`);
+					else
+						client.say(channel, `Rolled ${rand}, @${tags.username} won ${resultPoints} points and now has ${newTotalPoints} points`);
+				}
+
+				gambleActive = false;
+				setTimeout(() => {
+					gambleActive = true;
+				}, 2500);
+			}
+			break;*/
+			
 		case '!toptime':
 			if(toptimeActive) {
+				commandStats.toptime == undefined ? commandStats.toptime = 1 : commandStats.toptime += 1;
+				//var rawData = fs.readFileSync('top_users_list.txt');
 				var rawData = fs.readFileSync('new_top_users_list.txt');
 				client.say(channel, `${rawData}`);
 				
@@ -1338,9 +1667,11 @@ function onMessageHandler(channel, tags, message, self) {
 							
 		case '!pb':
 			if(pbActive) {
+				commandStats.pb == undefined ? commandStats.pb = 1 : commandStats.pb += 1;
 				var rawData = fs.readFileSync('editableCommands.json');
 				var data = JSON.parse(rawData);
 				client.say(channel, `@${tags.username}, ${data.pb}`);
+				//client.say(channel, `16 star - 20:45 | 70 star - 1:15:51`);
 				
 				pbActive = false;
 				setTimeout(() => {
@@ -1351,9 +1682,11 @@ function onMessageHandler(channel, tags, message, self) {
 			
 		case '!buns':
 			if(bunsActive) {
+				commandStats.buns == undefined ? commandStats.buns = 1 : commandStats.buns += 1;
 				var rawData = fs.readFileSync('editableCommands.json');
 				var data = JSON.parse(rawData);
 				client.say(channel, `@${tags.username}, ${data.buns}`);
+				//client.say(channel, `NETHERLAND DWARVES - bean, kiwi, jane, ve, peach, honey, peepo, bungi // HOLLAND LOP - mocha`);
 				
 				bunsActive = false;
 				setTimeout(() => {
@@ -1364,10 +1697,20 @@ function onMessageHandler(channel, tags, message, self) {
 			
 		case '!youtube':
 			if(youtubeActive) {
+				commandStats.youtube == undefined ? commandStats.youtube = 1 : commandStats.youtube += 1;
 				var youtube = youtubeGatherInfo("normal", channel);
 				youtube.then(function(result) {
 					client.say(channel, `Latest video: ${result} - YouTube Channel: https://youtube.com/c/Emiru1`);
 				});
+				/*var xhr = new XMLHttpRequest();
+				xhr.open('GET', `https://decapi.me/youtube/latest_video?id=UCZprw7Bxzfh2IysXNnl1S3g`, true);
+
+				xhr.onreadystatechange = () => {
+					if(xhr.readyState === 4 && xhr.status === 200) {
+						client.say(channel, `Latest video: ${xhr.responseText} - YouTube Channel: https://youtube.com/c/Emiru1`);
+					}
+				}
+				xhr.send(null);*/
 
 				youtubeActive = false;
 				setTimeout(() => {
@@ -1378,15 +1721,28 @@ function onMessageHandler(channel, tags, message, self) {
 			
 		case '!shorts':
 			if(shortsActive) {
+				commandStats.shorts == undefined ? commandStats.shorts = 1 : commandStats.shorts += 1;
 				var shorts = youtubeGatherInfo("short", channel);
 				shorts.then(function(result) {
 					client.say(channel, `Latest short: ${result} - YouTube Channel: https://youtube.com/c/Emiru1/shorts`);
 				});
+				/*var xhr = new XMLHttpRequest();
+				xhr.open('GET', `https://yt.lemnoslife.com/channels?part=shorts&id=UCZprw7Bxzfh2IysXNnl1S3g`, true);
+				
+				xhr.onreadystatechange = () => {
+					if(xhr.readyState === 4 && xhr.status === 200) {
+						var myArr = JSON.parse(xhr.responseText);
+						var shortTitle = myArr["items"][0]["shorts"][0]["title"];
+						var videoID = myArr["items"][0]["shorts"][0]["videoId"];
+						client.say(channel, `Latest short: ${shortTitle} - https://youtube.com/shorts/${videoID} - Youtube Channel: https://youtube.com/c/Emiru1/shorts`);
+					}
+				}
+				xhr.send(null);*/
 				
 				shortsActive = false;
 				setTimeout(() => {
 					shortsActive = true;
-				}, 2500);
+				}, 5000);
 			}
 			break;
 			
@@ -1394,10 +1750,19 @@ function onMessageHandler(channel, tags, message, self) {
 		case '!pod':
 		case '!noodleshop':
 			if(podcastActive) {
+				commandStats.podcast == undefined ? commandStats.podcast = 1 : commandStats.podcast += 1;
 				var podcast = youtubeGatherInfo('podcast', channel);
 				podcast.then(function(result) {
 					client.say(channel, `Latest Podcast: ${result} - Youtube Channel: https://www.youtube.com/channel/UCigQHgvqkxlF-e2OCji3Bzg - Tweet: https://twitter.com/NoodleShop/status/1569139677424414720`);
 				});
+				/*var xhr = new XMLHttpRequest();
+				xhr.open('GET', `https://decapi.me/youtube/latest_video?id=UCigQHgvqkxlF-e2OCji3Bzg`, true);
+				xhr.onreadystatechange = () => {
+					if(xhr.readyState === 4 && xhr.status === 200) {
+						client.say(channel, `@${tags.username}, Latest Podcast: ${xhr.responseText} - Youtube Channel: https://www.youtube.com/channel/UCigQHgvqkxlF-e2OCji3Bzg - Tweet: https://twitter.com/NoodleShop/status/1569139677424414720`);
+					}
+				}
+				xhr.send(null);*/
 				
 				podcastActive = false;
 				setTimeout(() => {
@@ -1408,23 +1773,29 @@ function onMessageHandler(channel, tags, message, self) {
 		
 		case '!prime':
 			if(primeActive) {
+				commandStats.prime == undefined ? commandStats.prime = 1 : commandStats.prime += 1;
 				client.say(channel, `Did you know you can use Amazon Twitch Prime to subscribe to Emiru for free! WOW! PogChamp 👉 emiruEZ`);
 				
 				primeActive = false;
 				setTimeout(() => {
 					primeActive = true;
-				}, 5000);
+				}, 2500);
 			}
 			break;
 			
 		case '!ping':
 			if(pingActive) {
+				commandStats.ping == undefined ? commandStats.ping = 1 : commandStats.ping += 1;
 				var time = process.uptime();
 				String.prototype.toHHMMSS = function() {
 					var days = Math.floor((this / (60 * 60 * 24))),
 						hours = Math.floor((this / (60 * 60)) % 24),
 						minutes = Math.floor((this / 60) % 60),
 						seconds = Math.floor(this % 60);
+					// var sec_num = parseInt(this, 10),
+					// 	hours = Math.floor(sec_num / 3600),
+					// 	minutes = Math.floor((sec_num - (hours * 3600)) / 60),
+					// 	seconds = sec_num - (hours * 3600) - (minutes * 60);
 					var time = [days, hours, minutes, seconds];
 					return time;
 				}
@@ -1446,6 +1817,7 @@ function onMessageHandler(channel, tags, message, self) {
 		case '!po':
 		case '!pobox':
 			if(poActive) {
+				commandStats.po == undefined ? commandStats.po = 1 : commandStats.po += 1;
 				client.say(channel, `Emi's PO BOX: Emiru, 500 E Whitestone Blvd #10, Cedar Park, TX 78613`);
 				
 				poActive = false;
@@ -1457,6 +1829,7 @@ function onMessageHandler(channel, tags, message, self) {
 			
 		case '!reddit':
 			if(redditActive) {
+				commandStats.reddit == undefined ? commandStats.reddit = 1 : commandStats.reddit += 1;
 				client.say(channel, `Emiru subreddit: https://www.reddit.com/r/emiru/`);
 				
 				redditActive = false;
@@ -1468,6 +1841,7 @@ function onMessageHandler(channel, tags, message, self) {
 			
 		case '!starforge':
 			if(starforgeActive) {
+				commandStats.starforge == undefined ? commandStats.starforge = 1 : commandStats.starforge += 1;
 				client.say(channel, `The best PCs in the universe. Get yours today: https://starforgepc.com/3OWT5El ⭐`);
 				
 				starforgeActive = false;
@@ -1479,6 +1853,7 @@ function onMessageHandler(channel, tags, message, self) {
 			
 		case '!essence':
 			if(essenceActive) {
+				commandStats.essence == undefined ? commandStats.essence = 1 : commandStats.essence += 1;
 				client.say(channel, `Fun Makeup for Fun People www.essencemakeup.com`);
 				
 				essenceActive = false;
@@ -1491,6 +1866,7 @@ function onMessageHandler(channel, tags, message, self) {
 		case '!squad':
 		case '!team':
 			if(teamActive) {
+				commandStats.team == undefined ? commandStats.team = 1 : commandStats.team += 1;
 				var rawData = fs.readFileSync('editableCommands.json');
 				var data = JSON.parse(rawData);
 				client.say(channel, `@${tags.username}, ${data.team}`);
@@ -1504,6 +1880,7 @@ function onMessageHandler(channel, tags, message, self) {
 			
 		case '!schedule': //if the check for if the user exists becomes too much, change it so that myMessage[1] is forced to start with an @ (no slicing needed)
 			if(scheduleActive) {
+				commandStats.schedule == undefined ? commandStats.schedule = 1 : commandStats.schedule += 1;
 				if(myMessage[1]) {
 					if(myMessage[1].startsWith('@'))
 						myMessage[1] = myMessage[1].slice(1);
@@ -1527,6 +1904,7 @@ function onMessageHandler(channel, tags, message, self) {
 			
 		case '!timeoff':
 			if(timeoffActive) {
+				commandStats.timeoff == undefined ? commandStats.timeoff = 1 : commandStats.timeoff += 1;
 				client.say(channel, `/timeout ${tags.username} 86400 decided to take some much needed time off`);
 				client.say(channel, `${tags.username} has decided that they need to take some much needed time away from twitch`);
 				//timeoutUser('timeout', tags.username, 86400, 'decided to take some much needed time off');
@@ -1540,6 +1918,7 @@ function onMessageHandler(channel, tags, message, self) {
 			
 		case '!help':
 			if(helpActive) {
+				commandStats.help == undefined ? commandStats.help = 1 : commandStats.help += 1;
 				if(myMessage[1] === undefined)
 					client.say(channel, `@${tags.username}, Help is available for the following commands: roulette, cookie, hate, love, 8ball, uptime, followage, accountage, watchtime/time, toptime`);
 				else if(!helpCommands.includes(myMessage[1].toLowerCase()))
@@ -1564,14 +1943,13 @@ function onMessageHandler(channel, tags, message, self) {
 			
 		case '!query':
 			if(queryActive) {
+				commandStats.query == undefined ? commandStats.query = 1 : commandStats.query += 1;
 				var args = [];
 				for(var i = 1; i < myMessage.length; i++) {
 					args.push(myMessage[i]);
 				}
 				var input = args.join('+');
-                var rawData = fs.readFileSync('data.json');
-				var data = JSON.parse(rawData);
-				var url = `https://api.wolframalpha.com/v1/result?i=${input}%3F&appid=${data.wolframAppID}`;
+				var url = `https://api.wolframalpha.com/v1/result?i=${input}%3F&appid=YTTYL5-8VE76VRY3A`;
 				var xhr = new XMLHttpRequest();
 				xhr.open('GET', url);
 				xhr.onreadystatechange = () => {
@@ -1586,10 +1964,50 @@ function onMessageHandler(channel, tags, message, self) {
 				}, 5000);
 			}
 			break;
+			
+		/*case '!sr':
+			var xhr = new XMLHttpRequest();
+			var playlist_id = `5HRZBHYzs6uxaammpF9URn`;
+			var trackID = myMessage[1].slice(31,-20);
+			var url = `https://api.spotify.com/v1/playlists/${playlist_id}/tracks?uris=spotify:track:${trackID}`;
+			xhr.open('POST', url);
+			xhr.onreadystatechange = () => {
+				if(xhr.readyState === 4 && (xhr.status >= 200 && xhr.status < 300)) {
+					var myArr = JSON.parse(xhr.responseText);
+					console.log(`successful post.  snapshot_id = ${myArr.snapshot_id}`);
+				}
+			}
+			//remember to add in functionality to do refresh token
+			xhr.setRequestHeader("Authorization", 'Bearer BQAkA0-r8e3NO7pTt55HC5qhT57KaxUHh3ITUIlXpglR_n2Zpp-RwFzz2NefOSgvVmL6tBHcB8oAzAqcabEiL0z5bL62i1bCC76a897sMbp-kA56udLka33O8QteTDdwu1jlsfWktvnSsyIinDSzAWf2LB-gl2iR4axJtbvcJu3FK0CneNKl7Zl4rSQCOrQ6mXCv9_Hg4i2DOX25zC_ZLViz-w');
+			xhr.setRequestHeader("Accept", "application/json");
+			xhr.setRequestHeader("Content-Type", "application/json");
+			xhr.send(null);
+			
+			break;*/
 
+		case '!stats':
+			if(statsActive) {
+				if(!myMessage[1])
+					client.say(channel, `${tags.username}, please include a command name to check its usage stats`);
+				else {
+					var rawData = fs.readFileSync('commandStats.json');
+					if(myMessage[1].startsWith('!'))
+						myMessage[1] = myMessage[1].slice(1)
+					var data = JSON.parse(rawData)[myMessage[1]];
+					client.say(channel, `@${tags.username}, as of 12/16/2022, ${myMessage[1]} has been used ${data} time(s)`);
+				}
+				
+				statsActive = false;
+				setTimeout(() => {
+					statsActive = true;
+				}, 2500);
+			}
+			break;
+		
 		case '!commands':
 			if(commandsActive) {
-				client.say(channel, `Command List: roulette, cookie, hate, love, cannon, wednesday, woo, title, doesemiruspeakchineseorgerman, brother, rules, smite, 8ball, sad, weeb, discord, elo, rank, instagram, merch, opgg, playlist, sub, twitter, wallpapers, emiruez, hype, cosplay, uwu, dmca, faq, height, tiktok, vanish, uptime, followage, accountage, time, toptime, pb, buns, youtube, shorts, podcast/pod/noodleshop, prime, po/pobox, reddit, starforge, essence, team/squad, schedule, help, commands`);
+				commandStats.commands == undefined ? commandStats.commands = 1 : commandStats.commands += 1;
+				client.say(channel, `Command List: roulette, cookie, hate, love, cannon, wednesday, woo, title, doesemiruspeakchineseorgerman, brother, rules, smite, 8ball, sad, weeb, discord, elo, rank, instagram, merch, opgg, playlist, sub, twitter, wallpapers, emiruez, hype, cosplay, uwu, dmca, faq, height, tiktok, vanish, uptime, followage, accountage, time, toptime, pb, buns, youtube, shorts, podcast/pod/noodleshop, prime, po/pobox, reddit, starforge, essence, team/squad, schedule, help, query, stats, commands`);
 				
 				if(customs.size > 0) {
 					var commands = Array.from(customs).join(', ');
@@ -1631,6 +2049,17 @@ function onMessageHandler(channel, tags, message, self) {
 				}, 5000);
 			}
 			break;
+		
+		case '!goat':
+			if(goatActive) {
+				client.say(channel, `messi is the best player on earth`);
+				
+				goatActive = false;
+				setTimeout(() => {
+					goatActive = true
+				}, 2500);
+			}
+			break
 		/*REDEEMED COMMANDS  END  HERE*/
 	}
 }
@@ -1649,6 +2078,7 @@ async function youtubeGatherInfo(videoType, channel) {
 			result = await getYoutubeStuff('GET', `${url}&skip=${normalIncrement += 1}`);
 			ans = await checkForShorts(result[0]);
 		}
+		// client.say(channel, `New Latest video: ${result[1]} - YouTube Channel: https://youtube.com/c/Emiru1`)
 	}
 	else if(videoType == "short") {
 		var result = await getYoutubeStuff('GET', `${url}&skip=${shortIncrement}`);
@@ -1657,6 +2087,7 @@ async function youtubeGatherInfo(videoType, channel) {
 			result = await getYoutubeStuff('GET', `${url}&skip=${shortIncrement += 1}`);
 			ans = await checkForShorts(result[0]);
 		}
+		// client.say(channel, `New Latest short: ${result[1]} - YouTube Channel: https://youtube.com/c/Emiru1/shorts`);
 	}
 	else if(videoType == "podcast") {
 		var result = await(getYoutubeStuff('GET', `${podcastURL}&skip=${podcastIncrement}`));
@@ -1665,6 +2096,7 @@ async function youtubeGatherInfo(videoType, channel) {
 			result = await(getYoutubeStuff('GET', `${podcastURL}&skip=${podcastIncrement += 1}`));
 			ans = await checkForShorts(result[0]);
 		}
+		// client.say(channel, `@${tags.username}, Latest Podcast: ${result[1]} - Youtube Channel: https://www.youtube.com/channel/UCigQHgvqkxlF-e2OCji3Bzg - Tweet: https://twitter.com/NoodleShop/status/1569139677424414720`);
 	}
 	return result[1];
 }
@@ -1672,7 +2104,7 @@ async function youtubeGatherInfo(videoType, channel) {
 function getYoutubeStuff(method, url) {
 	return new Promise(function (resolve, reject) {
 		var xhr = new XMLHttpRequest();
-		var now = new Date().toLocaleString('en-US', { timeZone: 'America/Chicago' });
+		var now = new Date().toLocaleString('en-US', { timeZone: 'America/Los_Angeles' });
 		xhr.open(method, url);
 		xhr.onload = function() {
 			if(xhr.readyState === 4 && xhr.status === 200) {
@@ -1743,7 +2175,7 @@ async function timeoutUser(method, username, duration, reason) {
 		var data = {"data": {"user_id":userID, "reason": reason}};
 		
 	var xhr = new XMLHttpRequest();
-	xhr.open('POST', 'https://api.twitch.tv/helix/moderation/bans?broadcaster_id=91067577&moderator_id=98397195', true);
+	xhr.open('POST', 'https://api.twitch.tv/helix/moderation/bans?broadcaster_id=47537917&moderator_id=98397195', true);
 	xhr.onload = function() {
 		console.log(`Loaded: ${xhr.status} ${xhr.response}`);
 	}
@@ -1807,12 +2239,16 @@ async function downtimeFunction() {
 	returnValues.push(seconds);
 	
 	return returnValues;
+	
+	/*var lastEndedAt = new Date(JSON.parse(rawData).lastEndedAt);
+	var now = Date.now();
+	var diff =  now - lastEndedAt;*/
 }
 
 function makeRequest(method, url) {
 	return new Promise(function (resolve, reject) {
 		var xhr = new XMLHttpRequest();
-		var now = new Date().toLocaleString('en-US', { timeZone: 'America/Chicago' });
+		var now = new Date().toLocaleString('en-US', { timeZone: 'America/Los_Angeles' });
 		xhr.open(method, url);
 		xhr.onload = function() {
 			if(xhr.readyState === 4 && xhr.status === 200) {
@@ -1825,6 +2261,7 @@ function makeRequest(method, url) {
 					statusText: xhr.statusText,
 					method: method,
 					url: url,
+					// xhr: xhr,
 					text: 'rejection occurred in makeRequest onload'
 				});
 			}
@@ -1836,6 +2273,7 @@ function makeRequest(method, url) {
 				statusText: xhr.statusText,
 				method: method,
 				url: url,
+				// xhr: xhr,
 				text: 'rejection occurred in makeRequest onerror'
 			});
 		};
@@ -1848,6 +2286,7 @@ function makeRequest(method, url) {
 async function getUser(username) {
 	var userID;
 	var url = `https://api.twitch.tv/helix/users?login=${username}`;
+	// var result = JSON.parse(await makeRequest('GET', `https://api.twitch.tv/helix/users?login=${username}`));
 	await makeRequest('GET', url)
 	.then(function(data) {
 		var result = JSON.parse(data);
@@ -1863,6 +2302,11 @@ async function getUser(username) {
 		console.log();
 	})
 	return userID;
+	// if(result['data'].length == 0)
+	// 	var userID = null;
+	// else
+	// 	var userID = result['data'][0]['id'];
+	// return userID;
 }
 
 async function getTemp() {
@@ -1881,7 +2325,7 @@ function refreshSpotifyToken(channel, tags) {
 	var refresh = data["SPOTIFY_REFRESH_TOKEN"];
 	var authOptions = {
 		url: 'https://accounts.spotify.com/api/token',
-		headers: {'Authorization': /*base64 client_id:client_secret*/}, 
+		headers: {'Authorization': 'Basic ZTBiMWJmN2Y2M2VkNDEwZThjMTE2NDk0ZmY1ZmJjYWQ6MDIyYjBlY2QxMjFhNGVmMmFlZjE4NDE3NTAyNTQ3MzI'}, //base64 client_id:client_secret
 		form: {
 			grant_type: 'refresh_token',
 			refresh_token: refresh
@@ -1933,7 +2377,7 @@ function changeCooldownBool(command, value, channel, tags) {
 	const db = new sqlite3.Database('./newUsers.db');
 	db.run("UPDATE customCommands SET isOnCooldown = $value WHERE command = $command", {$command: command, $value: value}, (err) => {
 		if(err) {
-			var now = new Date().toLocaleString('en-US', { timeZone: 'America/Chicago' });
+			var now = new Date().toLocaleString('en-US', { timeZone: 'America/Los_Angeles' });
 			client.say(channel, `@${tags.username}, something went wrong.  Please try again later on`);
 			console.log(now, ': command -> ', command, '; value -> ', value);
 			console.log(err);
@@ -2007,3 +2451,26 @@ function getHelp(command) {
 	}
 	return response;
 }
+
+// var ComfyJS = require('comfy.js');
+// ComfyJS.onCommand = ( user, command, message, flags, extra ) => {
+//     if( flags.customReward &&
+//         extra.customRewardId === "17d603bf-0874-446a-8a2e-5b5e781634e1" ) {
+
+//     ComfyJS.Say( "!sr " + message );
+//         console.log('do something')
+//     }
+// };
+
+
+
+// ComfyJS.onChat = ( user, message, flags, self, extra ) => {
+//     console.log('do something')
+//     if( flags.customReward &&
+//         extra.customRewardId === "17d603bf-0874-446a-8a2e-5b5e781634e1" ) {
+
+//         ComfyJS.Say( "!ddrsr " + message );
+//     }
+
+// };
+// ComfyJS.Init( TWITCHUSER, OAUTH );
