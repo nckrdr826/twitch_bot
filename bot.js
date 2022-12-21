@@ -204,15 +204,21 @@ process
 		var rawData = fs.readFileSync('data.json');
 		var data = JSON.parse(rawData).emiruDancy;
 		emiruDancyCount += parseInt(data);
-		if(emiruDancyCount === parseInt(data))
-			process.exit(0);
-		else {
+		if(emiruDancyCount !== parseInt(data)) {
 			ciqlJSON
 				.open("data.json")
 				.set("emiruDancy", emiruDancyCount)
 				.save();
-			process.exit(0);
 		}
+		const statsData = Object.keys(commandStats);
+		var statsNumbers = fs.readFileSync('commandStats.json');
+		var commandStatsData = JSON.parse(statsNumbers);
+		ciqlJSON.open('commandStats.json');
+		statsData.forEach((key, index) => {
+			ciqlJSON.set(`${key}`, commandStats[key] += commandStatsData[key])
+		})
+		ciqlJSON.save();
+		process.exit(0);
 	})
 	.on('unhandledRejection', (reason, p) => {
 		console.error(reason, 'Bruh Unhandled Rejection at Promise', p);
@@ -258,11 +264,13 @@ function onMessageHandler(channel, tags, message, self) {
 			.save();
 		emiruDancyCount = 0;
 		const statsData = Object.keys(commandStats);
-		ciqlJSON.open("commandStats.json");
+		var statsNumbers = fs.readFileSync('commandStats.json');
+		var commandStatsData = JSON.parse(statsNumbers);
+		ciqlJSON.open('commandStats.json');
 		statsData.forEach((key, index) => {
-			ciqlJSON.set(`${key}`, commandStats[key])
-			delete commandStats[key];
-		});
+			ciqlJSON.set(`${key}`, commandStats[key] += commandStatsData[key])
+		})
+	 
 		ciqlJSON.save();
 	}
 
@@ -1681,8 +1689,8 @@ function onMessageHandler(channel, tags, message, self) {
 					var rawData = fs.readFileSync('commandStats.json');
 					if(myMessage[1].startsWith('!'))
 						myMessage[1] = myMessage[1].slice(1)
-					var data = JSON.parse(rawData)[myMessage[1]];
-					client.say(channel, `@${tags.username}, as of 12/16/2022, ${myMessage[1]} has been used ${data} time(s)`);
+					var data = JSON.parse(rawData)[myMessage[1].toLowerCase()];
+					client.say(channel, `@${tags.username}, as of 12/16/2022, !${myMessage[1].toLowerCase()} has been used ${data} time(s)`);
 				}
 				
 				statsActive = false;
