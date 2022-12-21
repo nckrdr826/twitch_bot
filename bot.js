@@ -215,7 +215,8 @@ process
 		var commandStatsData = JSON.parse(statsNumbers);
 		ciqlJSON.open('commandStats.json');
 		statsData.forEach((key, index) => {
-			ciqlJSON.set(`${key}`, commandStats[key] += commandStatsData[key])
+			ciqlJSON.set(`${key}`, commandStats[key] += commandStatsData[key]);
+			delete commandStats[key];
 		})
 		ciqlJSON.save();
 		process.exit(0);
@@ -268,7 +269,8 @@ function onMessageHandler(channel, tags, message, self) {
 		var commandStatsData = JSON.parse(statsNumbers);
 		ciqlJSON.open('commandStats.json');
 		statsData.forEach((key, index) => {
-			ciqlJSON.set(`${key}`, commandStats[key] += commandStatsData[key])
+			ciqlJSON.set(`${key}`, commandStats[key] += commandStatsData[key]);
+			delete commandStats[key];
 		})
 	 
 		ciqlJSON.save();
