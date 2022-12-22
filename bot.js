@@ -215,7 +215,7 @@ process
 		var commandStatsData = JSON.parse(statsNumbers);
 		ciqlJSON.open('commandStats.json');
 		statsData.forEach((key, index) => {
-			ciqlJSON.set(`${key}`, commandStats[key] += commandStatsData[key]);
+			ciqlJSON.set(`${key}`, commandStatsData[key] ? commandStats[key] += commandStatsData[key] : commandStats[key]);
 			delete commandStats[key];
 		})
 		ciqlJSON.save();
@@ -269,7 +269,7 @@ function onMessageHandler(channel, tags, message, self) {
 		var commandStatsData = JSON.parse(statsNumbers);
 		ciqlJSON.open('commandStats.json');
 		statsData.forEach((key, index) => {
-			ciqlJSON.set(`${key}`, commandStats[key] += commandStatsData[key]);
+			ciqlJSON.set(`${key}`, commandStatsData[key] ? commandStats[key] += commandStatsData[key] : commandStats[key]);
 			delete commandStats[key];
 		})
 	 
@@ -832,7 +832,7 @@ function onMessageHandler(channel, tags, message, self) {
 
 		case '!discord':
 			if(discordActive) {
-				commandStats.dsicord == undefined ? commandStats.dsicord = 1 : commandStats.dsicord += 1;
+				commandStats.discord == undefined ? commandStats.discord = 1 : commandStats.discord += 1;
 				client.say(channel, `discord.gg/emiru emiruLOVE TO JOIN, GO TO THE VERIFICATION ROOM. To get sub status in Discord, simply sync your Twitch account to your Discord in settings!`);
 				
 				discordActive = false;
@@ -1691,7 +1691,11 @@ function onMessageHandler(channel, tags, message, self) {
 					var rawData = fs.readFileSync('commandStats.json');
 					if(myMessage[1].startsWith('!'))
 						myMessage[1] = myMessage[1].slice(1)
-					var data = JSON.parse(rawData)[myMessage[1].toLowerCase()];
+					
+					var data = commandStats[myMessage[1].toLowerCase()] ? JSON.parse(rawData)[myMessage[1].toLowerCase()] + commandStats[myMessage[1].toLowerCase()] : JSON.parse(rawData)[myMessage[1].toLowerCase()];
+					
+					if(data === undefined)
+						data = 0;
 					client.say(channel, `@${tags.username}, as of 12/16/2022, !${myMessage[1].toLowerCase()} has been used ${data} time(s)`);
 				}
 				
